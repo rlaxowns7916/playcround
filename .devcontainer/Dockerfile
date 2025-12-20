@@ -16,7 +16,12 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     lsb-release \
     bash-completion \
+    gcc \
+    gdb \
+    strace \
     sudo \
     && rm -rf /var/lib/apt/lists/*
+
+COPY settings/.vimrc /root/.vimrc
 
 WORKDIR /workspace
