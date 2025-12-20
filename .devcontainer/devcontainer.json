@@ -1,0 +1,24 @@
+{
+  "name": "ubuntu-dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "options": ["--platform=linux/amd64"]
+  },
+  "runArgs": [
+    "--platform=linux/amd64"
+  ],
+  "remoteUser": "root",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+        "extensions": [
+            "ms-vscode.cpptools-extension-pack",
+            "openai.chatgpt"
+        ]
+    }
+  }
+}
