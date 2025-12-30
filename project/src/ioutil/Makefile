@@ -16,7 +16,7 @@ all: $(LIB)
 # @는 명령은 실행하되, 화면 출력X
 $(LIB): $(LIB_OBJS)
 	@mkdir -p $(LIBDIR)
-	$(CC) $(LDFLAGS_SO) -I$(INC) -o $@ $^
+	$(CC) $(LDFLAGS_SO) -o $@ $^
 
 # 객체 파일: build/obj 아래로 생성
 $(OBJDIR)/%.o: %.c

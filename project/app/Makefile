@@ -9,7 +9,7 @@ OBJS = main.o
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) -I$(INC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) -I$(INC) $(CFLAGS)  -c $<
