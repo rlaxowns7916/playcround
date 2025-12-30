@@ -2,12 +2,8 @@
   "name": "ubuntu-dev",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".",
-    "options": ["--platform=linux/amd64"]
+    "context": "."
   },
-  "runArgs": [
-    "--platform=linux/amd64"
-  ],
   "remoteUser": "root",
   "workspaceFolder": "/workspace",
   "mounts": [

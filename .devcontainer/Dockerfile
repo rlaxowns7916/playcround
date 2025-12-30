@@ -1,8 +1,6 @@
 # .devcontainer/Dockerfile
 FROM ubuntu:22.04
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 # 기본 유틸
 RUN apt-get update && apt-get install -y \
     ca-certificates \
@@ -20,7 +18,10 @@ RUN apt-get update && apt-get install -y \
     gdb \
     strace \
     sudo \
+    make \
     && rm -rf /var/lib/apt/lists/*
+
+ENV LD_LIBRARY_PATH=/workspace/project/build/lib:${LD_LIBRARY_PATH}
 
 COPY settings/.vimrc /root/.vimrc
 
