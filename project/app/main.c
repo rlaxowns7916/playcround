@@ -2,9 +2,15 @@
 #include<string.h>
 #include <stdio.h>
 #include<stdlib.h>
-#include "ethernet.h"
 #include <arpa/inet.h>
 
+#include "ethernet.h"
+#include "ip.h"
+#include "filter.h"
+
+static FilterChainNode* filterChain;
+
+void initFilterChain();
 void packet_handler(char* param, const struct pcap_pkthdr* header, const char* pkt_data);
 
 int main(void) {
@@ -74,6 +80,9 @@ int main(void) {
 	/* At this point, we don't need any more the device list. Free it */
 	pcap_freealldevs(alldevs);
 
+	/* Initialize filter chain */
+	initFilterChain();
+
     /* start the capture */
 	pcap_loop(adhandle, 0, packet_handler, NULL);
 
@@ -82,14 +91,20 @@ int main(void) {
     return 0;
 }
 
+void initFilterChain(){
+	static FilterChainNode iph = { ipHandler, NULL };
+    static FilterChainNode eth = { ethernetHandler, &iph };
+
+	eth.next = &iph;
+	filterChain = &eth;
+}
+
 void packet_handler(char* param, const struct pcap_pkthdr* header, const char* pkt_data)
 {
-	if (header->caplen < sizeof(EthernetHeader)) {
-        return;
-    }
-
-    EthernetHeader eth;
-    memcpy(&eth, pkt_data, sizeof(EthernetHeader));
-
-    printEthernetHeader(stdout, &eth);
+	FilterHandle handle = {(char*)pkt_data, header->len};
+	FilterChainNode* node = filterChain;
+	while(node){
+		node->handler(&handle);
+		node = node->next;
+	}
 }
