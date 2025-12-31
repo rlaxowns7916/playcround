@@ -1,18 +1,24 @@
 CC     = gcc
 CFLAGS = -Wall -g
-INC    = ../include
-LDFLAGS = -L../build/lib -lioutil
+INC    = -I../include
+LDFLAGS = -L../build/lib -lioutil -lpcap -lethernet
 
-TARGET = app
-OBJS = main.o
+OBJDIR = ../build/obj
+LIBDIR = ../build/lib
+APPDIR = ../build/app
+
+TARGET = $(APPDIR)/app
+OBJ = $(OBJDIR)/main.o
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJ)
+	@mkdir -p $(APPDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-%.o: %.c
-	$(CC) -I$(INC) $(CFLAGS)  -c $<
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(OBJDIR)
+	$(CC) $(INC) $(CFLAGS)  -c $< -o $@
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f $(TARGET) $(OBJ)

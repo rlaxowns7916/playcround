@@ -1,6 +1,6 @@
 CC      = gcc
 CFLAGS  = -Wall -g -fPIC
-INC     = ../../include
+INC     = -I../../include
 LDFLAGS_SO = -shared
 
 OBJDIR = ../../build/obj
@@ -21,7 +21,7 @@ $(LIB): $(LIB_OBJS)
 # 객체 파일: build/obj 아래로 생성
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) -I$(INC) -c $< -o $@
+	$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 clean:
 	rm -rf $(LIB)
