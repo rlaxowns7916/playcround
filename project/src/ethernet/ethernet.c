@@ -1,8 +1,25 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include "ethernet.h"
 #include <arpa/inet.h>
+#include "filter.h"
 
 char* typeToString(unsigned short type);
+
+int ethernetHandler(FilterHandle* handle){
+    if (handle->remaining < sizeof(EthernetHeader))
+        return FLITER_HANDLER_NOT_ENOUGH_REMAINING;
+    
+    EthernetHeader eth;
+    memcpy(&eth, handle->cursor, sizeof(EthernetHeader));
+
+    printEthernetHeader(stdout, &eth);
+    handle->cursor += sizeof(EthernetHeader);
+    handle->remaining -= sizeof(EthernetHeader);
+    
+
+    return FILTER_HANDLER_SUCCESS;
+}
 
 void printEthernetHeader(FILE *file, EthernetHeader *header)
 {

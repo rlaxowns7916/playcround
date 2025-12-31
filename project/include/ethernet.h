@@ -1,4 +1,5 @@
 #include<string.h>
+#include "filter.h"
 
 #pragma pack(push,1)
 typedef struct EthernetHeader{
@@ -15,4 +16,4 @@ typedef enum {
 } EtherType;
 
 
-void printEthernetHeader(FILE* file, EthernetHeader* header);
+int ethernetHandler(FilterHandle* handle);
