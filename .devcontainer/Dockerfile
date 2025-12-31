@@ -19,10 +19,17 @@ RUN apt-get update && apt-get install -y \
     strace \
     sudo \
     make \
+    libpcap-dev \ 
     && rm -rf /var/lib/apt/lists/*
 
 ENV LD_LIBRARY_PATH=/workspace/project/build/lib:${LD_LIBRARY_PATH}
 
 COPY settings/.vimrc /root/.vimrc
+
+COPY settings/SampleTraces.zip /tmp/SampleTraces.zip
+
+RUN  unzip /tmp/SampleTraces.zip -d / && \
+    rm /tmp/SampleTraces.zip && \
+    mv SampleTraces pcap-samples
 
 WORKDIR /workspace
