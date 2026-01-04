@@ -3,8 +3,33 @@
 #include<stdlib.h>
 #include "ip.h"
 #include <arpa/inet.h>
+#include "datastructure/map.h"
+
+
+static struct Map* l4LookupTable = NULL;
 
 void printIpHeader(FILE *file, const IpHeader *header, const char* options);
+
+void ip_registerL4Handler(IpType protocol, FilterHandler handler) {
+    if (!l4LookupTable) {
+        l4LookupTable = map_create();
+    }
+    map_put(l4LookupTable, &protocol, sizeof(IpType), handler);
+}
+
+void ip_init() {
+    if (l4LookupTable) {
+        map_destroy(l4LookupTable);
+    }
+    l4LookupTable = map_create();
+}
+
+void ip_cleanup() {
+    if (l4LookupTable) {
+        map_destroy(l4LookupTable);
+        l4LookupTable = NULL;
+    }
+}
 
 int ipHandler(FilterHandle* handle){
     if (handle->remaining < sizeof(IpHeader))
@@ -19,7 +44,7 @@ int ipHandler(FilterHandle* handle){
 
 
     size_t opt_len = (ihl - 5) * 4;
-    char* options = NULL; 
+    char* options = NULL;
     if (opt_len > 0) {
         if (handle->remaining < opt_len)
             return FLITER_HANDLER_NOT_ENOUGH_REMAINING;
@@ -34,6 +59,14 @@ int ipHandler(FilterHandle* handle){
     if (options)
         free(options);
 
+    IpType protocol = iph.protocol;
+    if (l4LookupTable) {
+        FilterHandler nextHandler = (FilterHandler)map_get(l4LookupTable, &protocol, sizeof(IpType));
+
+        if (nextHandler) {
+            return nextHandler(handle);
+        }
+    }
 
     return FILTER_HANDLER_SUCCESS;
 }
@@ -60,8 +93,11 @@ void printIpHeader(FILE *file, const IpHeader *header, const char* options)
     fprintf(file, "  Identification : %u\n", id);
     fprintf(file, "  Flags          : 0x%X (DF=%d, MF=%d)\n",
             flags, !!(frag & 0x4000), !!(frag & 0x2000));
+            // R (Reserved: 항상 0)
+            // DF(Don't Fragment: Router에게 fragment하지말라고 지시)
+            // MF(More Fragment: 이 뒤에 Fragment가 있는지 -> 마지막일 떄 0) 
     fprintf(file, "  Fragment Offset: %u (%u bytes)\n",
-            offset, offset * 8);
+            offset, offset * 8); //offset은 8Byte 단위가 된다.
     fprintf(file, "  TTL            : %u\n", header->ttl);
     fprintf(file, "  Protocol       : %u\n", header->protocol);
     fprintf(file, "  Checksum       : 0x%04X\n",

@@ -1,7 +1,7 @@
 CC     = gcc
 CFLAGS = -Wall -g
 INC    = -I../include
-LDFLAGS = -L../build/lib -lip -lethernet -lpcap -lioutil 
+LDFLAGS = -L../build/lib -lip -lethernet -ltcp -lpcap -lioutil -ldatastructure 
 
 OBJDIR = ../build/obj
 LIBDIR = ../build/lib

@@ -3,20 +3,53 @@
 #include "ethernet.h"
 #include <arpa/inet.h>
 #include "filter.h"
+#include "datastructure/map.h"
+
+static struct Map* l3LookupTable = NULL;
 
 char* typeToString(unsigned short type);
+
+void ethernet_registerL3Handler(EtherType etherType, FilterHandler handler) {
+    if (!l3LookupTable) {
+        l3LookupTable = map_create();
+    }
+    map_put(l3LookupTable, &etherType, sizeof(EtherType), handler);
+}
+
+void ethernet_init() {
+    if (l3LookupTable) {
+        map_destroy(l3LookupTable);
+    }
+    l3LookupTable = map_create();
+}
+
+void ethernet_cleanup() {
+    if (l3LookupTable) {
+        map_destroy(l3LookupTable);
+        l3LookupTable = NULL;
+    }
+}
 
 int ethernetHandler(FilterHandle* handle){
     if (handle->remaining < sizeof(EthernetHeader))
         return FLITER_HANDLER_NOT_ENOUGH_REMAINING;
-    
+
     EthernetHeader eth;
     memcpy(&eth, handle->cursor, sizeof(EthernetHeader));
 
     printEthernetHeader(stdout, &eth);
     handle->cursor += sizeof(EthernetHeader);
     handle->remaining -= sizeof(EthernetHeader);
-    
+
+   
+    EtherType ethertype = ntohs(eth.type);
+    if (l3LookupTable) {
+        FilterHandler nextHandler = (FilterHandler)map_get(l3LookupTable, &ethertype, sizeof(EtherType));
+
+        if (nextHandler) {
+            return nextHandler(handle);
+        }
+    }
 
     return FILTER_HANDLER_SUCCESS;
 }

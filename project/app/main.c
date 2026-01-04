@@ -6,11 +6,11 @@
 
 #include "ethernet.h"
 #include "ip.h"
+#include "tcp.h"
 #include "filter.h"
 
-static FilterChainNode* filterChain;
-
-void initFilterChain();
+void initProtocolHandlers();
+void cleanupProtocolHandlers();
 void packet_handler(char* param, const struct pcap_pkthdr* header, const char* pkt_data);
 
 int main(void) {
@@ -77,34 +77,35 @@ int main(void) {
 
     printf("\nlistening on %s...\n", d->description);
 
+	initProtocolHandlers();
+
 	/* At this point, we don't need any more the device list. Free it */
 	pcap_freealldevs(alldevs);
-
-	/* Initialize filter chain */
-	initFilterChain();
 
     /* start the capture */
 	pcap_loop(adhandle, 0, packet_handler, NULL);
 
 	pcap_close(adhandle);
+	cleanupProtocolHandlers();
 
     return 0;
 }
 
-void initFilterChain(){
-	static FilterChainNode iph = { ipHandler, NULL };
-    static FilterChainNode eth = { ethernetHandler, &iph };
+void initProtocolHandlers(){
+	ethernet_init();
+	ethernet_registerL3Handler(ETHERTYPE_IPV4, ipHandler);
 
-	eth.next = &iph;
-	filterChain = &eth;
+	ip_init();
+	ip_registerL4Handler(IpType_TCP, tcpHandler);
+}
+
+void cleanupProtocolHandlers(){
+	ethernet_cleanup();
+	ip_cleanup();
 }
 
 void packet_handler(char* param, const struct pcap_pkthdr* header, const char* pkt_data)
 {
 	FilterHandle handle = {(char*)pkt_data, header->len};
-	FilterChainNode* node = filterChain;
-	while(node){
-		node->handler(&handle);
-		node = node->next;
-	}
+	ethernetHandler(&handle);
 }

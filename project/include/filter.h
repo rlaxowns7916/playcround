@@ -16,9 +16,4 @@ typedef enum FilterHandleResponse{
 
 typedef int (*FilterHandler)(FilterHandle* handle);
 
-typedef struct FilterChainNode {
-    FilterHandler handler;
-    struct FilterChainNode* next;
-} FilterChainNode;
-
 #endif

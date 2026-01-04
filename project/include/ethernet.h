@@ -1,3 +1,6 @@
+#ifndef ETHERNET_H
+#define ETHERNET_H
+
 #include<string.h>
 #include "filter.h"
 
@@ -17,3 +20,10 @@ typedef enum {
 
 
 int ethernetHandler(FilterHandle* handle);
+
+// 초기화 및 등록 함수
+void ethernet_init();
+void ethernet_cleanup();
+void ethernet_registerL3Handler(EtherType etherType, FilterHandler handler);
+
+#endif
